@@ -1,3 +1,7 @@
+let screenBoard = document.querySelector('.grid-container');
+
+
+
 function Game(players,board){
     let active;
     let player1 = players[0];
@@ -103,6 +107,15 @@ function Gameboard(){
         }
     }
 
+    const checkDiagnol = function(player,board){
+        if(board[0][0] === player && board[1][1] === player && board[2][2] === player || board[0][2] === player && board[1][1] === player && board[2][0] === player){
+            return true
+        }
+        else{
+            return false
+        }
+    }
+
     const alignMark = (player,placedMark) => {
         // possible future imlementation, if computer use this method of input, if human use other method of input
         let col = Math.floor(Math.random() * 3) + 1;
@@ -121,6 +134,7 @@ function Gameboard(){
                                     console.log(`This spot is occupied!`)
                                     col = Math.floor(Math.random() * 3) + 1;
                                     row = Math.floor(Math.random() * 3) + 1;
+                                    break;
                                     //alignMark(player,false);
     
                                 }
@@ -128,7 +142,44 @@ function Gameboard(){
                                     currentSpots++;
                                     placedMark = true;
                                     board[i][k] = player
-                                    return ;
+                                    let rowCount = 0;
+                                    let colCount = 0;
+                                    for(let j = 0;j < 3;j++){
+                                        if(board[i][j] === player){
+                                            rowCount = rowCount + 1;
+                                        }
+                                    }
+                                    if(rowCount === 3){
+                                        console.log(`${player} wins!`)
+                                        GameController.endGame();
+                                        return ;
+                                    }
+                                    
+                                    for(let h = 0;h < 3;h++){
+                                        if(board[h][k] === player){
+                                            colCount = colCount + 1;
+                                        }
+                                    }
+                                    if(colCount === 3){
+                                        console.log(`${player} wins!`)
+                                        GameController.endGame();
+                                        return ;
+                                    }
+
+                                    let diag = checkDiagnol(player,board);
+
+                                    if(diag === true){
+                                        console.log(`${player} wins!`)
+                                        GameController.endGame();
+                                        return ;
+                                    }
+                                    
+                                    
+
+                                    return
+                                        
+                                   
+                                    
                                 }
                             }
                         }
