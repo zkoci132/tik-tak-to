@@ -1,0 +1,16 @@
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 2rem;
+    border: 1px solid grey;
+    background: lightyellow;
+    cursor: pointer;
+  }
+
+  .board{
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
+  }

@@ -1,4 +1,60 @@
-let screenBoard = document.querySelector('.grid-container');
+
+
+
+const screenController = (function(){
+    const game = GameController();
+    const header = document.querySelector('.header');
+    const screenBoard = document.querySelector('.board');
+
+    const startGame = function(){
+        game.playGame()
+    }
+
+    const updateScreen = function(){
+        screenBoard.textContent = "";
+        let num = 1;
+        const currBoard = game.getBoard();
+
+        
+        for(let i = 0;i < 3;i++){
+            for(let k = 0;k< 3;k++){
+                const cellButton = document.createElement('button')
+                cellButton.id = String(num);
+                cellButton.textContent = currBoard[i][k]
+                num++;
+                currBoard[i][k] = cellButton.textContent
+                screenBoard.appendChild(cellButton)
+
+
+              
+            }
+        }
+        console.log(`BOARD: ${currBoard}`)
+
+        
+    }
+
+    
+
+    
+
+    return { startGame,updateScreen }
+
+    
+
+    
+
+    
+
+
+    
+
+})();
+
+//const runGame = screenController();
+screenController.startGame();
+
+
 
 
 
@@ -44,7 +100,11 @@ function Game(players,board){
         console.log(`It is ${active}'s turn...`)
 
         
-        gameboard.placeMark(active);
+        gameStatus = gameboard.placeMark(active);
+
+        if(gameStatus === true){
+            return 'off'
+        }
         
         
 
@@ -62,10 +122,15 @@ function Game(players,board){
 
         console.log(gameboard.printBoard());
 
+        return 'on'
+
+        /*
         if(gameboard.getSpots() === gameboard.MAXSIZE){
-            GameController.endGame()
-            return
+            //GameController.endGame()
+            //screenController.endGame();
+            return true;
         }
+        */
         
 
 
@@ -103,7 +168,7 @@ function Gameboard(){
     for(let i = 0;i < rows;i++){
         board[i] = [];
         for(let j = 0;j < columns;j++){
-            board[i].push(Cell())
+            board[i].push("")
         }
     }
 
@@ -121,7 +186,10 @@ function Gameboard(){
         let col = Math.floor(Math.random() * 3) + 1;
         let row = Math.floor(Math.random() * 3) + 1;
         if(currentSpots === MAXSIZE){
-            GameController.endGame();
+            //GameController.endGame();
+            //screenController.finishGame();
+            //endGame();
+            return true;
         }
         else{
             while(placedMark === false && currentSpots < MAXSIZE){
@@ -151,8 +219,10 @@ function Gameboard(){
                                     }
                                     if(rowCount === 3){
                                         console.log(`${player} wins!`)
-                                        GameController.endGame();
-                                        return ;
+                                        //GameController.endGame();
+                                        //screenController.finishGame();
+                                        //endGame();
+                                        return true;
                                     }
                                     
                                     for(let h = 0;h < 3;h++){
@@ -162,21 +232,25 @@ function Gameboard(){
                                     }
                                     if(colCount === 3){
                                         console.log(`${player} wins!`)
-                                        GameController.endGame();
-                                        return ;
+                                        //GameController.endGame();
+                                        //screenController.finishGame();
+                                        //endGame();
+                                        return true;
                                     }
 
                                     let diag = checkDiagnol(player,board);
 
                                     if(diag === true){
                                         console.log(`${player} wins!`)
-                                        GameController.endGame();
-                                        return ;
+                                        //GameController.endGame();
+                                        //screenController.finishGame();
+                                        //endGame();
+                                        return true;
                                     }
                                     
                                     
 
-                                    return
+                                    return false
                                         
                                    
                                     
@@ -198,7 +272,8 @@ function Gameboard(){
 
     const placeMark = (player) => {
         let placedMark = false;
-        alignMark(player,placedMark)
+        let didGameEnd = alignMark(player,placedMark)
+        return didGameEnd;
     }
 
     return {printBoard,placeMark,getSpots}
@@ -215,6 +290,8 @@ function Cell() {
   
     // How we will retrieve the current value of this cell through closure
     const getMark = () => mark;
+
+   
   
     return {
       displayMark,
@@ -223,8 +300,9 @@ function Cell() {
   }
 
 
-const GameController = (function(){
+function GameController(){
     let keepPlaying = 'off';
+    
 
     const players = [
         {
@@ -238,13 +316,21 @@ const GameController = (function(){
             humanOrcpu: 'cpu'
         }
     ]
-    
 
     const board = Gameboard();
+
+
+    
+
+    
+
+
+    
 
     
     const playGame = function(){
         keepPlaying = 'on';
+        
         currentGame = Game(players,board);
         console.log(`${players[0].symbol} is the humie. ${players[1].symbol} is the cpu`)
         currentGame.decideOrder();
@@ -255,7 +341,12 @@ const GameController = (function(){
         */
 
         while(keepPlaying==='on'){
-            currentGame.takeTurn();
+            
+            keepPlaying = currentGame.takeTurn();
+            screenController.updateScreen();
+        }
+        if(keepPlaying === 'off'){
+            endGame();
         }
        
         
@@ -280,6 +371,10 @@ const GameController = (function(){
         return game;
     }
 
+    const getBoard = function(){
+        return board.printBoard();
+    }
+
     const reportPlayers = function(){
         console.log(`${player1} is the human, ${player2} is the cpu`);
     }
@@ -287,50 +382,17 @@ const GameController = (function(){
 
     return{
             
-            setStatus,getGame,reportPlayers,displayNewRound,playGame,endGame
+            setStatus,getGame,reportPlayers,displayNewRound,playGame,endGame,getBoard
         }
     
-})();
-
-/*
-const playGame = function(player1,player2){
-    player1 = player1;
-    player2 = player2;
-    game = 'on';
-    
-
-
-    announce();
-
-    console.log("Ending game...");
-    GameController.setStatus("off");
-    
 }
-*/
 
 
 
-    
 
-/*
-const board = Gameboard();
 
-console.log(board.printBoard())
 
-board.placeMark('X',1,1);
 
-console.log(board.printBoard())
-
-board.placeMark('O',3,2);
-
-console.log(board.printBoard())
-
-GameController.displayNewRound();
-
-console.log("Done")
-*/
-
-GameController.playGame();
 
 
 
