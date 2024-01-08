@@ -58,7 +58,14 @@ function Game(players,board){
 
         console.log(gameboard.printBoard());
 
-        console.log(`Next turn will be ${active}!!!!`)
+        if(gameboard.getSpots() === gameboard.MAXSIZE){
+            GameController.endGame()
+            return
+        }
+        
+
+
+        
 
         
 
@@ -86,6 +93,8 @@ function Gameboard(){
     const rows = 3;
     const columns = 3;
     const board = [];
+    let currentSpots = 0;
+    const MAXSIZE = 9;
 
     for(let i = 0;i < rows;i++){
         board[i] = [];
@@ -98,35 +107,42 @@ function Gameboard(){
         // possible future imlementation, if computer use this method of input, if human use other method of input
         let col = Math.floor(Math.random() * 3) + 1;
         let row = Math.floor(Math.random() * 3) + 1;
-        
-        while(placedMark === false){
-            console.log(`column: ${col}, row: ${row}`)
-            for(let i = 0; i < row;i++){
-                if(i+1 === row){
-                    for(let k = 0; k < 3;k++){
-                        if(k+1 === col){
-                            if(board[i][k] === 'X' || board[i][k] === 'O'){
-                                console.log(`This spot is occupied!`)
-                                col = Math.floor(Math.random() * 3) + 1;
-                                row = Math.floor(Math.random() * 3) + 1;
-                                //alignMark(player,false);
-                                
-                            }
-                            else{
-                                placedMark = true;
-                                board[i][k] = player
-                                return ;
+        if(currentSpots === MAXSIZE){
+            GameController.endGame();
+        }
+        else{
+            while(placedMark === false && currentSpots < MAXSIZE){
+                console.log(`column: ${col}, row: ${row}`)
+                for(let i = 0; i < row;i++){
+                    if(i+1 === row){
+                        for(let k = 0; k < 3;k++){
+                            if(k+1 === col){
+                                if(board[i][k] === 'X' || board[i][k] === 'O'){
+                                    console.log(`This spot is occupied!`)
+                                    col = Math.floor(Math.random() * 3) + 1;
+                                    row = Math.floor(Math.random() * 3) + 1;
+                                    //alignMark(player,false);
+    
+                                }
+                                else{
+                                    currentSpots++;
+                                    placedMark = true;
+                                    board[i][k] = player
+                                    return ;
+                                }
                             }
                         }
                     }
-                }
+            }
+
         }
+        
 
         };
         
         
     }
-
+    const getSpots = () => currentSpots
     const printBoard = () => board
 
     const placeMark = (player) => {
@@ -134,7 +150,7 @@ function Gameboard(){
         alignMark(player,placedMark)
     }
 
-    return {printBoard,placeMark}
+    return {printBoard,placeMark,getSpots}
 }
 
 
@@ -186,9 +202,11 @@ const GameController = (function(){
             currentGame.takeTurn();
         }
         */
-       for(let i = 0;i < 3;i++){
-           currentGame.takeTurn();
-       }
+
+        while(keepPlaying==='on'){
+            currentGame.takeTurn();
+        }
+       
         
         
     }
