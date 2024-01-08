@@ -107,12 +107,15 @@ function Gameboard(){
                         if(k+1 === col){
                             if(board[i][k] === 'X' || board[i][k] === 'O'){
                                 console.log(`This spot is occupied!`)
-                                markPlaced = false;
-                                alignMark(player,false);
+                                col = Math.floor(Math.random() * 3) + 1;
+                                row = Math.floor(Math.random() * 3) + 1;
+                                //alignMark(player,false);
+                                
                             }
                             else{
+                                placedMark = true;
                                 board[i][k] = player
-                                return true;
+                                return ;
                             }
                         }
                     }
