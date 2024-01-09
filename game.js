@@ -11,6 +11,10 @@ const screenController = (function(){
     const restartButton = document.querySelector('.restart')
     const startButton = document.querySelector('.start')
     const nameButton = document.querySelector('.nameButton')
+    const detailText = document.querySelector('.gameDetails')
+    const turnText = document.querySelector('.turnDisplay')
+    const winnerText = document.querySelector('.winDisplay')
+    
 
 
 
@@ -27,17 +31,31 @@ const screenController = (function(){
     restartButton.addEventListener('click',restartGame)
     nameButton.addEventListener('click',()=>{
         let inputValue = document.getElementById('playerName').value
+        let nameText = document.createTextNode(`Player: ${inputValue}`)
+        if(detailText.hasChildNodes()){
+            detailText.removeChild(detailText.firstChild)
+            detailText.appendChild(nameText);
+        }
+        else{
+            detailText.appendChild(nameText);
+        }
+        
 
-        humanName = inputValue;
+        //humanName = inputValue;
         //startGame();
 
         
     })
     
-    const startGame = function(humanName){
-            if(turns === 0){
-                document.createElement
+    const startGame = function(){
+
+        
+            if(winnerText.hasChildNodes()){
+                winnerText.removeChild(winnerText.firstChild)
             }
+          
+            
+            
             game.getSetCurrentSpots(0)
             gameOver = false
             turns = 0
@@ -45,6 +63,9 @@ const screenController = (function(){
             game.setOrder()
             updateScreen()
             game.playGame()
+            
+            //turnText.appendChild(playerTurn);
+            
         
         
     }
@@ -54,12 +75,26 @@ const screenController = (function(){
         let displayOutcome = document.querySelector('.outcome')
         let playerHolder = game.getPlayers()
         let winner = "";
-        for(let i = 0;i < playerHolder.length;i++){
-            if(playerHolder[i].won === true){
-                winner = playerHolder[i].name   
-                playerHolder[i].won = false
+        if(playerHolder[0].won === true || playerHolder[1] === true){
+            for(let i = 0;i < playerHolder.length;i++){
+                if(playerHolder[i].won === true){
+                    if(playerHolder[i].humanOrcpu === "cpu"){
+                        winner = playerHolder[i].name   
+                        playerHolder[i].won = false
+                        winnerText.appendChild(document.createTextNode(`${winner} has won!`))
+                    }
+                    else{
+                        winnerText.appendChild(document.createTextNode(`${detailText.textContent} has won!`))
+                        playerHolder[i].won = false
+                    }
+                    
+                }
             }
         }
+       
+        
+        
+        //winnerText.appendChild(document.createTextNode(`${winner} has won!`))
 
         console.log(`GAME OVER ${winner} WINS!!!`)
 
@@ -68,10 +103,15 @@ const screenController = (function(){
 
    
 
+
     const updateScreen = function(){
         screenBoard.textContent = "";
         let num = 1;
         const currBoard = game.getBoard();
+
+        let displayPlayers = game.getPlayers();
+
+        
 
         
         for(let i = 0;i < 3;i++){
@@ -79,23 +119,68 @@ const screenController = (function(){
                 const cellButton = document.createElement('button')
                 cellButton.id = String(num);
                 cellButton.textContent = currBoard[i][k]
+                
+                cellButton.style.fontFamily = "chalk"
+                cellButton.style.fontSize = "100px"
                 cellButton.style.backgroundColor = "black"
                 cellButton.addEventListener('click',handleClick)
-                if(num === 1){
-                    cellButton.style.borderRight = "2px solid white"
-                    
+                if(num === 1 || num === 2 || num === 3){
+                    if(num === 3){
+                        cellButton.style.borderBottom = "20px solid white"
+                    }
+                    else{
+                        cellButton.style.borderRight = "20px solid white"
+                        cellButton.style.borderBottom = "20px solid white"
+                    }
+                   
+                }
+                else if(num === 4 || num === 5 || num === 6){
+                    if(num === 6){
+                        cellButton.style.borderBottom = "20px solid white"
+                    }
+                    else{
+                        cellButton.style.borderRight = "20px solid white"
+                        cellButton.style.borderBottom = "20px solid white"
+                    }
+                        
+                }
+                else if(num === 7 || num === 8){
+                    cellButton.style.borderRight = "20px solid white"
                 }
 
+                cellButton.borderRadius = "100%"
 
+                
 
                 num++;
                 currBoard[i][k] = cellButton.textContent
                 screenBoard.appendChild(cellButton)
 
 
+
               
             }
         }
+        
+        
+                if(displayPlayers[0].turn === true){
+                    const playerTurn = document.createTextNode(`It is ${detailText.textContent}'s turn`) 
+                    if(turnText.hasChildNodes()){
+                        turnText.removeChild(turnText.firstChild)
+                        turnText.appendChild(playerTurn);
+                    }
+                    else{
+                        turnText.appendChild(playerTurn);
+                    }
+                }
+
+                else{
+                    
+                    if(turnText.hasChildNodes()){
+                        turnText.removeChild(turnText.firstChild)
+                        
+                    }
+                }
         console.log(`BOARD: ${currBoard}`)
 
         
@@ -241,12 +326,14 @@ function Game(players,board){
         
     }
 
+    
+
     const takeTurn = function(){
         player1.turn = false
         player2.turn = true
         screenController.setTurns(screenController.getTurns()+1)
         //let gameStatus;
-
+        
         if(player1.turn === true){
             //active = player1.symbol;
            // gameStatus = gameboard.placeMark(active);
@@ -423,11 +510,16 @@ function Gameboard(){
 
     } 
 
+    
+
+
+
     const alignMark = (player,placedMark) => {
         // possible future imlementation, if computer use this method of input, if human use other method of input
         let holder = getInput(player)
         let col = holder[0];
         let row = holder[1];
+      
         if(currentSpots === MAXSIZE){
             //GameController.endGame();
             screenController.finishGame();
@@ -495,7 +587,7 @@ function Gameboard(){
                                     */
                                     
                                     
-
+                                    
                                     return 
                                         
                                    
