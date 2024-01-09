@@ -1,3 +1,10 @@
+
+:root {
+    --border-size: 2px;
+    --border-color: white;
+    background-color: black;
+  }
+
 .cell {
     display: flex;
     justify-content: center;
@@ -11,8 +18,17 @@
 
   .board{
       display: grid;
+      align-content: center;
+      justify-content: center;
       grid-template-columns: 1fr 1fr 1fr;
       grid-template-rows: 1fr 1fr 1fr;
       height: 500px;
       width: 500px;
   }
+
+  #1{
+      border-right: var(--border-size) solid var(--border-color);
+
+  }
+
+  

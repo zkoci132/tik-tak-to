@@ -2,12 +2,46 @@
 
 
 const screenController = (function(){
+    let humanName = "Human"
     let turns = 0;
+    let gameOver = false;
     const game = GameController();
     const header = document.querySelector('.header');
     const screenBoard = document.querySelector('.board');
+    const restartButton = document.querySelector('.restart')
+    const startButton = document.querySelector('.start')
+    const nameButton = document.querySelector('.nameButton')
+
+
+
     
-    const startGame = function(){
+
+    const restartGame = function(){
+        //console.log("Game restarted")
+       
+        startGame();
+    }
+
+
+    startButton.addEventListener('click',restartGame)
+    restartButton.addEventListener('click',restartGame)
+    nameButton.addEventListener('click',()=>{
+        let inputValue = document.getElementById('playerName').value
+
+        humanName = inputValue;
+        //startGame();
+
+        
+    })
+    
+    const startGame = function(humanName){
+            if(turns === 0){
+                document.createElement
+            }
+            game.getSetCurrentSpots(0)
+            gameOver = false
+            turns = 0
+            game.getClearBoard()
             game.setOrder()
             updateScreen()
             game.playGame()
@@ -16,7 +50,19 @@ const screenController = (function(){
     }
 
     const finishGame = function(){
-        console.log("GAME OVER")
+        gameOver = true
+        let displayOutcome = document.querySelector('.outcome')
+        let playerHolder = game.getPlayers()
+        let winner = "";
+        for(let i = 0;i < playerHolder.length;i++){
+            if(playerHolder[i].won === true){
+                winner = playerHolder[i].name   
+                playerHolder[i].won = false
+            }
+        }
+
+        console.log(`GAME OVER ${winner} WINS!!!`)
+
         //game.endGame()
     }
 
@@ -33,7 +79,12 @@ const screenController = (function(){
                 const cellButton = document.createElement('button')
                 cellButton.id = String(num);
                 cellButton.textContent = currBoard[i][k]
+                cellButton.style.backgroundColor = "black"
                 cellButton.addEventListener('click',handleClick)
+                if(num === 1){
+                    cellButton.style.borderRight = "2px solid white"
+                    
+                }
 
 
 
@@ -51,57 +102,80 @@ const screenController = (function(){
     }
 
     const handleClick = function(event){
-        turns++;
-        if(turns < 9){
-            let currBoard = game.getBoard()
-            const clicked = event.target
-            console.log(clicked)
-            clicked.textContent = "X"
-            let place = clicked.id
-            let num = 1
-            for(let i = 0;i < 3;i++){
-                for(let k = 0;k < 3;k++){
-                    if(num === parseInt(place)){
-                        currBoard[i][k] = clicked.textContent
+        if(gameOver !== true){
+            let target = event.target
+            if(target.textContent !== "X" && target.textContent !== "O"){
+                turns++;
+                let players = game.getPlayers();
+                if(turns < 9){
+                    let currBoard = game.getBoard()
+                    const clicked = event.target
+                    console.log(clicked)
+                    clicked.textContent = "X"
+                    let place = clicked.id
+                    let num = 1
+                    for(let i = 0;i < 3;i++){
+                        for(let k = 0;k < 3;k++){
+                            if(num === parseInt(place)){
+                                currBoard[i][k] = clicked.textContent
+                                game.getDetermineWinner(players[0],i,k)
+                            }
+                            num++
+                        }
                     }
-                    num++
-                }
-            }
-            //currBoard.board
-            console.log('Button clicked! Updating screen...');
-            let players = game.getPlayers();
-            players[0].turn = false
+                    //currBoard.board
+                    console.log('Button clicked! Updating screen...');
+            
+                    if(gameOver === true){
+                        updateScreen();
+                    }
+                    else{
+                        players[0].turn = false
         
-            players[1].turn = true;
-            updateScreen();
+                        players[1].turn = true;
+                        updateScreen();
 
-            game.playGame()
-        }
-        else{
-            let currBoard = game.getBoard()
-            const clicked = event.target
-            console.log(clicked)
-            clicked.textContent = "X"
-            let place = clicked.id
-            let num = 1
-            for(let i = 0;i < 3;i++){
-                for(let k = 0;k < 3;k++){
-                    if(num === parseInt(place)){
-                        currBoard[i][k] = clicked.textContent
+                        game.playGame()
                     }
-                    num++
+            
+            
+                }
+                else{
+                    let currBoard = game.getBoard()
+                    const clicked = event.target
+                    console.log(clicked)
+                    clicked.textContent = "X"
+                    let place = clicked.id
+                    let num = 1
+                    let players = game.getPlayers();
+                    for(let i = 0;i < 3;i++){
+                        for(let k = 0;k < 3;k++){
+                            if(num === parseInt(place)){
+                                currBoard[i][k] = clicked.textContent
+                                game.getDetermineWinner(players[0],i,k)
+                            }
+                            num++
+                        }
+                    }
+                    //currBoard.board
+                    console.log('Button clicked! Updating screen...');
+                    
+                    players[0].turn = false
+        
+                    players[1].turn = true;
+                    updateScreen();
                 }
             }
-            //currBoard.board
-            console.log('Button clicked! Updating screen...');
-            let players = game.getPlayers();
-            players[0].turn = false
+
+            }
         
-            players[1].turn = true;
-            updateScreen();
         }
+
+            
         
-    }
+        
+        
+    
 
     const getTurns = function(){
         return turns
@@ -113,12 +187,12 @@ const screenController = (function(){
 
     
 
-    
+    updateScreen();
 
     return { startGame,updateScreen,finishGame,getTurns,setTurns }
 
     
-
+    
     
 
     
@@ -129,7 +203,7 @@ const screenController = (function(){
 })();
 
 //const runGame = screenController();
-screenController.startGame();
+//screenController.startGame();
 
 
 
@@ -168,6 +242,8 @@ function Game(players,board){
     }
 
     const takeTurn = function(){
+        player1.turn = false
+        player2.turn = true
         screenController.setTurns(screenController.getTurns()+1)
         //let gameStatus;
 
@@ -259,6 +335,15 @@ function Gameboard(){
         }
     }
 
+    const clearBoard = function(){
+        for(let i = 0;i < rows;i++){
+            board[i] = [];
+            for(let j = 0;j < columns;j++){
+                board[i].push("")
+            }
+        }
+    }
+
     const checkDiagnol = function(player,board){
         if(board[0][0] === player && board[1][1] === player && board[2][2] === player || board[0][2] === player && board[1][1] === player && board[2][0] === player){
             return true
@@ -288,6 +373,55 @@ function Gameboard(){
         humanInput = human;
     }
     */
+    const setCurrentSpots = function(num){
+        currentSpots = num
+    }
+
+    const determineWinner = function(player,i,k){
+        let rowCount = 0;
+        let colCount = 0;
+        for(let j = 0;j < 3;j++){
+            if(board[i][j] === player.symbol){
+                rowCount = rowCount + 1;
+            }
+        }
+        if(rowCount === 3){
+            console.log(`${player.symbol} wins!`)
+            //GameController.endGame();
+            player.won = true;
+            screenController.finishGame();
+            //endGame();
+            //return true;
+        }
+        
+        for(let h = 0;h < 3;h++){
+            if(board[h][k] === player.symbol){
+                colCount = colCount + 1;
+            }
+        }
+        if(colCount === 3){
+            console.log(`${player.symbol} wins!`)
+            //GameController.endGame();
+            player.won = true;
+            screenController.finishGame();
+            //endGame();
+            //return true;
+        }
+
+        let diag = checkDiagnol(player.symbol,board);
+
+        if(diag === true){
+            console.log(`${player.symbol} wins!`)
+            //GameController.endGame();
+            player.won = true;
+            screenController.finishGame();
+            //endGame();
+            //return true;
+        }
+
+
+
+    } 
 
     const alignMark = (player,placedMark) => {
         // possible future imlementation, if computer use this method of input, if human use other method of input
@@ -320,8 +454,8 @@ function Gameboard(){
                                     currentSpots++;
                                     placedMark = true;
                                     board[i][k] = player.symbol
-                                    let rowCount = 0;
-                                    let colCount = 0;
+                                    determineWinner(player,i,k)
+                                    /*
                                     for(let j = 0;j < 3;j++){
                                         if(board[i][j] === player.symbol){
                                             rowCount = rowCount + 1;
@@ -357,6 +491,8 @@ function Gameboard(){
                                         //endGame();
                                         //return true;
                                     }
+
+                                    */
                                     
                                     
 
@@ -382,11 +518,11 @@ function Gameboard(){
 
     const placeMark = (player) => {
         let placedMark = false;
-        let didGameEnd = alignMark(player,placedMark)
-        return didGameEnd;
+        alignMark(player,placedMark)
+        //return didGameEnd;
     }
 
-    return {printBoard,placeMark,getSpots}
+    return {printBoard,placeMark,getSpots,determineWinner,clearBoard,setCurrentSpots}
 }
 
 
@@ -398,7 +534,6 @@ function Cell() {
       mark = symbol;
     };
   
-    // How we will retrieve the current value of this cell through closure
     const getMark = () => mark;
 
    
@@ -410,7 +545,8 @@ function Cell() {
   }
 
 
-function GameController(){
+function GameController(p1){
+    let humanName = p1;
     //let keepPlaying = 'off';
     let gameOver = false;
     
@@ -420,12 +556,17 @@ function GameController(){
         {
             symbol: 'X',
             turn: false,
-            humanOrcpu: 'human'
+            humanOrcpu: 'human',
+            name: humanName,
+            won: false
+            
         },
         {
             symbol: 'O',
             turn: false,
-            humanOrcpu: 'cpu'
+            humanOrcpu: 'cpu',
+            name: "CPU",
+            won: false
         }
     ]
 
@@ -435,10 +576,18 @@ function GameController(){
     
     
     const playGame = function(){
+        /*
+        if(screenController.turns === 0){
+            players[0].name = name
+        }
+        */
+        
+        /*
         if(screenController.getTurns() === 0){
             game.decideOrder
             
         }
+        */
         /*
         currentGame = Game(players,board);
         screenController.updateScreen();
@@ -451,6 +600,7 @@ function GameController(){
         }
         */
        if(players[1].turn === true){
+           console.log(players)
            game.takeTurn()
            screenController.updateScreen()
        }
@@ -515,6 +665,11 @@ function GameController(){
         return players
     }
 
+    const getDetermineWinner = function(player,i,k){
+        board.determineWinner(player,i,k)
+
+    }
+
     const reportPlayers = function(){
         console.log(`${player1} is the human, ${player2} is the cpu`);
     }
@@ -523,10 +678,18 @@ function GameController(){
         game.decideOrder()
     }
 
+    const getClearBoard = function(){
+        board.clearBoard()
+    }
+
+    const getSetCurrentSpots = function(num){
+        board.setCurrentSpots(num)
+    }
+
 
     return{
             
-            setStatus,getGame,reportPlayers,displayNewRound,playGame,endGame,getBoard,setBoard,getPlayers,getGameOver,setGameOver,setOrder
+            getSetCurrentSpots,setStatus,getGame,reportPlayers,displayNewRound,playGame,endGame,getBoard,setBoard,getPlayers,getGameOver,setGameOver,setOrder,getDetermineWinner,getClearBoard
         }
     
 }
