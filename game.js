@@ -2,13 +2,25 @@
 
 
 const screenController = (function(){
+    let turns = 0;
     const game = GameController();
     const header = document.querySelector('.header');
     const screenBoard = document.querySelector('.board');
-
+    
     const startGame = function(){
-        game.playGame()
+            game.setOrder()
+            updateScreen()
+            game.playGame()
+        
+        
     }
+
+    const finishGame = function(){
+        console.log("GAME OVER")
+        //game.endGame()
+    }
+
+   
 
     const updateScreen = function(){
         screenBoard.textContent = "";
@@ -21,6 +33,10 @@ const screenController = (function(){
                 const cellButton = document.createElement('button')
                 cellButton.id = String(num);
                 cellButton.textContent = currBoard[i][k]
+                cellButton.addEventListener('click',handleClick)
+
+
+
                 num++;
                 currBoard[i][k] = cellButton.textContent
                 screenBoard.appendChild(cellButton)
@@ -34,11 +50,72 @@ const screenController = (function(){
         
     }
 
-    
+    const handleClick = function(event){
+        turns++;
+        if(turns < 9){
+            let currBoard = game.getBoard()
+            const clicked = event.target
+            console.log(clicked)
+            clicked.textContent = "X"
+            let place = clicked.id
+            let num = 1
+            for(let i = 0;i < 3;i++){
+                for(let k = 0;k < 3;k++){
+                    if(num === parseInt(place)){
+                        currBoard[i][k] = clicked.textContent
+                    }
+                    num++
+                }
+            }
+            //currBoard.board
+            console.log('Button clicked! Updating screen...');
+            let players = game.getPlayers();
+            players[0].turn = false
+        
+            players[1].turn = true;
+            updateScreen();
+
+            game.playGame()
+        }
+        else{
+            let currBoard = game.getBoard()
+            const clicked = event.target
+            console.log(clicked)
+            clicked.textContent = "X"
+            let place = clicked.id
+            let num = 1
+            for(let i = 0;i < 3;i++){
+                for(let k = 0;k < 3;k++){
+                    if(num === parseInt(place)){
+                        currBoard[i][k] = clicked.textContent
+                    }
+                    num++
+                }
+            }
+            //currBoard.board
+            console.log('Button clicked! Updating screen...');
+            let players = game.getPlayers();
+            players[0].turn = false
+        
+            players[1].turn = true;
+            updateScreen();
+        }
+        
+    }
+
+    const getTurns = function(){
+        return turns
+    }
+
+    const setTurns = function(newTurns){
+        turns = newTurns
+    }
 
     
 
-    return { startGame,updateScreen }
+    
+
+    return { startGame,updateScreen,finishGame,getTurns,setTurns }
 
     
 
@@ -59,6 +136,7 @@ screenController.startGame();
 
 
 function Game(players,board){
+    
     let active;
     let player1 = players[0];
     let player2 = players[1];
@@ -84,27 +162,35 @@ function Game(players,board){
         }
 
         active = firstPlayer.symbol
+
+        
         
     }
 
     const takeTurn = function(){
-        
-        
+        screenController.setTurns(screenController.getTurns()+1)
+        //let gameStatus;
+
         if(player1.turn === true){
-            active = player1.symbol;
+            //active = player1.symbol;
+           // gameStatus = gameboard.placeMark(active);
+            //gameboard.placeMark(player1)
         }
         else{
             active = player2.symbol;
+           // gameStatus = gameboard.placeMark(active);
+            gameStatus = gameboard.placeMark(player2)
         }
 
         console.log(`It is ${active}'s turn...`)
 
         
-        gameStatus = gameboard.placeMark(active);
-
+        
+        /*
         if(gameStatus === true){
             return 'off'
         }
+        */
         
         
 
@@ -122,7 +208,7 @@ function Game(players,board){
 
         console.log(gameboard.printBoard());
 
-        return 'on'
+        //return 
 
         /*
         if(gameboard.getSpots() === gameboard.MAXSIZE){
@@ -159,6 +245,7 @@ function Game(players,board){
 }
 
 function Gameboard(){
+    let humanInput;
     const rows = 3;
     const columns = 3;
     const board = [];
@@ -181,15 +268,37 @@ function Gameboard(){
         }
     }
 
+    const getInput = function(player){
+        let rowColList = [];
+        if(player.humanOrcpu === 'cpu'){
+            rowColList[0] = (Math.floor(Math.random() * 3) + 1);
+            rowColList[1] = (Math.floor(Math.random() * 3) + 1)
+        }
+        else{
+           // humanInput = true;
+           /* while(humanInput === true){
+
+            }
+            */
+        }
+        return rowColList;
+    }
+    /*
+    const setHumanInput = function(human){
+        humanInput = human;
+    }
+    */
+
     const alignMark = (player,placedMark) => {
         // possible future imlementation, if computer use this method of input, if human use other method of input
-        let col = Math.floor(Math.random() * 3) + 1;
-        let row = Math.floor(Math.random() * 3) + 1;
+        let holder = getInput(player)
+        let col = holder[0];
+        let row = holder[1];
         if(currentSpots === MAXSIZE){
             //GameController.endGame();
-            //screenController.finishGame();
+            screenController.finishGame();
             //endGame();
-            return true;
+            //return true;
         }
         else{
             while(placedMark === false && currentSpots < MAXSIZE){
@@ -200,8 +309,9 @@ function Gameboard(){
                             if(k+1 === col){
                                 if(board[i][k] === 'X' || board[i][k] === 'O'){
                                     console.log(`This spot is occupied!`)
-                                    col = Math.floor(Math.random() * 3) + 1;
-                                    row = Math.floor(Math.random() * 3) + 1;
+                                    holder = getInput(player)
+                                    col = holder[0];
+                                    row = holder[1];
                                     break;
                                     //alignMark(player,false);
     
@@ -209,48 +319,48 @@ function Gameboard(){
                                 else{
                                     currentSpots++;
                                     placedMark = true;
-                                    board[i][k] = player
+                                    board[i][k] = player.symbol
                                     let rowCount = 0;
                                     let colCount = 0;
                                     for(let j = 0;j < 3;j++){
-                                        if(board[i][j] === player){
+                                        if(board[i][j] === player.symbol){
                                             rowCount = rowCount + 1;
                                         }
                                     }
                                     if(rowCount === 3){
-                                        console.log(`${player} wins!`)
+                                        console.log(`${player.symbol} wins!`)
                                         //GameController.endGame();
-                                        //screenController.finishGame();
+                                        screenController.finishGame();
                                         //endGame();
-                                        return true;
+                                        //return true;
                                     }
                                     
                                     for(let h = 0;h < 3;h++){
-                                        if(board[h][k] === player){
+                                        if(board[h][k] === player.symbol){
                                             colCount = colCount + 1;
                                         }
                                     }
                                     if(colCount === 3){
-                                        console.log(`${player} wins!`)
+                                        console.log(`${player.symbol} wins!`)
                                         //GameController.endGame();
-                                        //screenController.finishGame();
+                                        screenController.finishGame();
                                         //endGame();
-                                        return true;
+                                        //return true;
                                     }
 
-                                    let diag = checkDiagnol(player,board);
+                                    let diag = checkDiagnol(player.symbol,board);
 
                                     if(diag === true){
-                                        console.log(`${player} wins!`)
+                                        console.log(`${player.symbol} wins!`)
                                         //GameController.endGame();
-                                        //screenController.finishGame();
+                                        screenController.finishGame();
                                         //endGame();
-                                        return true;
+                                        //return true;
                                     }
                                     
                                     
 
-                                    return false
+                                    return 
                                         
                                    
                                     
@@ -301,7 +411,9 @@ function Cell() {
 
 
 function GameController(){
-    let keepPlaying = 'off';
+    //let keepPlaying = 'off';
+    let gameOver = false;
+    
     
 
     const players = [
@@ -319,42 +431,52 @@ function GameController(){
 
     const board = Gameboard();
 
-
+    let game = Game(players,board);
     
-
-    
-
-
-    
-
     
     const playGame = function(){
-        keepPlaying = 'on';
-        
+        if(screenController.getTurns() === 0){
+            game.decideOrder
+            
+        }
+        /*
         currentGame = Game(players,board);
+        screenController.updateScreen();
         console.log(`${players[0].symbol} is the humie. ${players[1].symbol} is the cpu`)
         currentGame.decideOrder();
+        */
         /*
         while(keepPlaying === 'on'){
             currentGame.takeTurn();
         }
         */
-
+       if(players[1].turn === true){
+           game.takeTurn()
+           screenController.updateScreen()
+       }
+       else{
+           console.log("Human turn")
+       }
+       /*
         while(keepPlaying==='on'){
             
             keepPlaying = currentGame.takeTurn();
             screenController.updateScreen();
         }
+        */
+       /*
         if(keepPlaying === 'off'){
             endGame();
         }
+        */
        
         
         
     }
 
     const endGame = function(){
-        keepPlaying = 'off';
+        //keepPlaying = 'off';
+        gameOver = true
         console.log("Game has ended");
     }
     
@@ -367,6 +489,12 @@ function GameController(){
         
     }
 
+    
+
+    const setBoard = function(sboard){
+        board.setHumanInput(sboard)
+    }
+
     const getGame = function(){
         return game;
     }
@@ -375,14 +503,30 @@ function GameController(){
         return board.printBoard();
     }
 
+    const getGameOver = function(){
+        return gameOver;
+    }
+
+    const setGameOver = function(status){
+        gameOver = status;
+    }
+
+    const getPlayers = function(){
+        return players
+    }
+
     const reportPlayers = function(){
         console.log(`${player1} is the human, ${player2} is the cpu`);
+    }
+
+    const setOrder = function(){
+        game.decideOrder()
     }
 
 
     return{
             
-            setStatus,getGame,reportPlayers,displayNewRound,playGame,endGame,getBoard
+            setStatus,getGame,reportPlayers,displayNewRound,playGame,endGame,getBoard,setBoard,getPlayers,getGameOver,setGameOver,setOrder
         }
     
 }
